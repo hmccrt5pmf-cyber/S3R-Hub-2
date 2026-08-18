@@ -212,14 +212,27 @@ local function releaseKey(keyCode)
     VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
 end
 
--- 1. Stamina Farm
+-- دالة خلط مصفوفة المفاتيح عشوائياً
+local function shuffleTable(tbl)
+    local result = {unpack(tbl)}
+    for i = #result, 2, -1 do
+        local j = math.random(i)
+        result[i], result[j] = result[j], result[i]
+    end
+    return result
+end
+
+-- 1. Stamina Farm (ترتيب مفاتيح الحركة عشوائي كل دورة)
 task.spawn(function()
     while true do
         if isStaminaFarming then
             pressKey(Enum.KeyCode.LeftShift)
-            local keys = {Enum.KeyCode.W, Enum.KeyCode.S, Enum.KeyCode.D, Enum.KeyCode.A}
+            
+            -- إنشاء مصفوفة الأحرف وخلط ترتيبها عشوائياً
+            local baseKeys = {Enum.KeyCode.W, Enum.KeyCode.S, Enum.KeyCode.D, Enum.KeyCode.A}
+            local randomizedKeys = shuffleTable(baseKeys)
 
-            for _, key in ipairs(keys) do
+            for _, key in ipairs(randomizedKeys) do
                 if not isStaminaFarming then break end
                 pressKey(key)
                 
@@ -247,21 +260,18 @@ task.spawn(function()
     end
 end)
 
--- 2. Auto Jump Farm (يظل ضاغط زر النط بدون ما يفكه طوال الـ 13 قفزة)
+-- 2. Auto Jump Farm
 task.spawn(function()
     while true do
         if isJumpFarming then
-            -- الضغط الاستمراري على زر Space
             pressKey(Enum.KeyCode.Space)
             
-            -- الانتظار طوال فترة الـ 13 قفزة (حوالي 6.5 ثانية)
             local elapsed = 0
             while elapsed < 6.5 and isJumpFarming do
                 task.wait(0.1)
                 elapsed = elapsed + 0.1
             end
             
-            -- فك الضغط عن زر Space لبدء الاستراحة
             releaseKey(Enum.KeyCode.Space)
 
             if isJumpFarming then
